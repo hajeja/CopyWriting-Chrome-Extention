@@ -1,0 +1,27 @@
+{
+  "repository": "hajeja/CopyWriting-Foundation",
+  "branch": "main",
+  "commit": "618799d519dba93159c96307d03e4ebb39707bc1",
+  "verifiedAt": "2026-11-26",
+  "globalFrom": "supplier",
+  "files": {
+    "supplier": {
+      "path": "foundation/astro-copy-config-v0.3.1-supplier-terminology.json",
+      "sourcePath": "domains/supplier/astro-copy-config-v0.3.1-supplier-terminology.json",
+      "blobSha": "e8e1e1def9f8678ac8099a982c5de1b487dfebb1",
+      "version": "0.3.1-pilot-draft"
+    },
+    "buyer": {
+      "path": "foundation/buyer-guidelines-v0.1.1-pilot-approved.json",
+      "sourcePath": "domains/buyer/buyer-guidelines-v0.1.1-pilot-approved.json",
+      "blobSha": "9bd69f7ba6fd1bb85f943abef9cdf278ec19ed55",
+      "version": "0.2.0-playbook-replacement"
+    },
+    "mitra": {
+      "path": "foundation/mitra-guidelines-v0.1.1-pilot-approved.json",
+      "sourcePath": "domains/mitra/mitra-guidelines-v0.1.1-pilot-approved.json",
+      "blobSha": "847dc9640272af5f97acd10d9bbdb896ae270fa3",
+      "version": "0.1.1-pilot-approved"
+    }
+  }
+}

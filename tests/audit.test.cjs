@@ -1,0 +1,31 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const foundationCode=fs.readFileSync('review-foundation.js','utf8');
+const sandbox={console}; vm.createContext(sandbox); vm.runInContext(foundationCode,sandbox);
+const cfg=JSON.parse(fs.readFileSync('foundation/astro-copy-config-v0.3.1-supplier-terminology.json'));
+assert.match(sandbox.validateConfig(cfg).config.version,/^0\.3\.1/);
+const view=sandbox.foundationView(cfg,'supplier');
+const original=cfg.domains.supplier || cfg.domains.vendor;
+assert.equal(view.guidelines.length,original.guidelines.filter(x=>x.reviewStatus==='approved' && x.enabledForPilot===true).length);
+assert(view.guidelines.every(x => original.guidelines.some(y=>y.id===x.id && y.reviewStatus==='approved' && y.enabledForPilot)));
+assert(!view.glossary.some(x=>['rejected','hold','pending_confirmation'].includes(x.reviewStatus)));
+assert.throws(()=>sandbox.normalizeReviewOutput({decision:'Needs Context',findings:['Need details']}),/question/);
+assert.throws(()=>sandbox.normalizeReviewOutput({decision:'Rewrite',findings:['Issue']}),/replacement/);
+const guarded=sandbox.applyReviewGuardrails(sandbox.normalizeReviewOutput({decision:'Keep',findings:[]}),{currentCopy:'Vendor invoice'},{domain:'supplier'},cfg);
+assert.equal(guarded.decision,'Rewrite'); assert.equal(guarded.suggestion,'Supplier invoice');
+const uncertain=sandbox.applyReviewGuardrails(sandbox.normalizeReviewOutput({decision:'Needs Context',findings:['Missing rule'],openQuestion:'What happens?'}),{currentCopy:'Vendor invoice'},{domain:'supplier'},cfg);
+assert.equal(uncertain.decision,'Needs Context'); assert.equal(uncertain.suggestion,''); assert.match(uncertain.findings[0],/Supplier/);
+const prompt=sandbox.buildSystemPrompt({domain:'supplier'},cfg);
+assert(prompt.includes('untrusted evidence')); assert(prompt.includes('Never invent')); assert(prompt.includes('mandatoryTerminology'));
+const manifest=JSON.parse(fs.readFileSync('manifest.json')); assert(manifest.permissions.includes('contextMenus')); assert(manifest.permissions.includes('activeTab')); assert(!manifest.permissions.includes('<all_urls>')); assert(manifest.host_permissions.includes('https://supplier-portal-invoice.haibearstd.chatgpt.site/*')); assert(!manifest.host_permissions.includes('<all_urls>'));
+console.log('Foundation filtering, decision guardrails, prompt, and extension permissions verified.');
+// Simulated banner containers mirror the observed nested text after browser innerText rendering.
+function banner(text, opts={}) { return {innerText:text,isConnected:true,closest:()=>opts.hidden?{}:null,contains:other=>(opts.children||[]).includes(other),getBoundingClientRect:()=>({width:10,height:10}),getClientRects:()=>[{}]}; }
+const child=banner('Nested content');
+const blue=banner('Title\nMulai 29 Oktober 2026, body.\nTutorial Pengajuan Laporan SCU\nKunjungi SCU',{children:[child]});
+const orange=banner('Schedule\nTahun Baru 2026/2027 mulai 22 Desember 2026.\nSupporting description\nLihat detail');
+const dom={document:{querySelectorAll:()=>[blue,child,orange,banner('hidden',{hidden:true})]},window:{},crypto:{randomUUID:()=> 'token'},getComputedStyle:()=>({display:'block',visibility:'visible',opacity:'1'})};
+vm.createContext(dom); const extracted=vm.runInContext(fs.readFileSync('page-audit.js','utf8'),dom);
+assert.equal(extracted.total,2); assert.match(extracted.items[0].text,/29 Oktober 2026/); assert.match(extracted.items[0].text,/Tutorial Pengajuan Laporan SCU/); assert.match(extracted.items[1].text,/22 Desember 2026/); assert.equal(dom.window.__astroCopyAudit.elements[1],orange);
+console.log('Banner grouping, nested-container deduplication, dates and element references verified with DOM mocks.');

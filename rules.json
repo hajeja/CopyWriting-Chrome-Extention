@@ -1,0 +1,42 @@
+{
+  "_source": "ASTRO Copywriting Guideline 2026 — Part 1 (UX Writing) + Part 2 (Creative Copy)",
+
+  "informalToFormal": [
+    { "wrong": "disini", "correct": "di sini", "note": "KBBI: kata depan 'di' dipisah dari kata penunjuk tempat" },
+    { "wrong": "disana", "correct": "di sana", "note": "KBBI: kata depan 'di' dipisah dari kata penunjuk tempat" },
+    { "wrong": "dimana", "correct": "di mana", "note": "KBBI: kata depan 'di' dipisah dari kata tanya" },
+    { "wrong": "krn", "correct": "karena", "note": "Hindari singkatan tidak baku di copy" },
+    { "wrong": "yg", "correct": "yang", "note": "Hindari singkatan tidak baku di copy" },
+    { "wrong": "utk", "correct": "untuk", "note": "Hindari singkatan tidak baku di copy" },
+    { "wrong": "ngedate", "correct": "Nge-date", "note": "Slang harus pakai tanda hubung: 'Nge-date', bukan 'Ngedate'" }
+  ],
+
+  "internalJargon": [
+    { "term": "invalid", "note": "Part 1 rule 4: avoid internal/technical terms. Use 'Not found' or 'Couldn't verify' instead." },
+    { "term": "authentication", "note": "Part 1 rule 4: too technical for user-facing copy." },
+    { "term": "verification failed", "note": "Part 1 rule 4: too technical — try 'Couldn't verify'." },
+    { "term": "payload", "note": "Part 1 rule 4: internal/dev term, never user-facing." },
+    { "term": "transaction", "note": "Part 1 rule 4: prefer plain language depending on context (e.g. 'order', 'payment')." }
+  ],
+
+  "uncertaintyWords": [
+    { "term": "maybe", "note": "Part 1 rule 18: avoid uncertainty unless genuinely uncertain." },
+    { "term": "possibly", "note": "Part 1 rule 18: avoid uncertainty unless genuinely uncertain." },
+    { "term": "seems like", "note": "Part 1 rule 18: avoid uncertainty unless genuinely uncertain." },
+    { "term": "looks like", "note": "Part 1 rule 18: avoid uncertainty unless genuinely uncertain." },
+    { "term": "mungkin", "note": "Part 1 rule 18: avoid uncertainty unless genuinely uncertain." },
+    { "term": "sepertinya", "note": "Part 1 rule 18: avoid uncertainty unless genuinely uncertain." },
+    { "term": "kayaknya", "note": "Part 1 rule 18: avoid uncertainty unless genuinely uncertain." }
+  ],
+
+  "overPolitenessPhrases": [
+    { "term": "please kindly", "note": "Part 1 rule 19: avoid unnecessary politeness — 'Check the code.' not 'Please kindly make sure...'" },
+    { "term": "mohon dengan hormat", "note": "Part 1 rule 19: avoid unnecessary politeness in product copy." },
+    { "term": "mohon kesediaannya", "note": "Part 1 rule 19: avoid unnecessary politeness in product copy." }
+  ],
+
+  "toneAvoid": ["sarcastic", "childish", "overly enthusiastic", "marketing-heavy language inside product flows"],
+  "toneAim": ["friendly", "calm", "helpful", "efficient", "human"],
+
+  "_note": "Formatting/pattern rules (nominal, units, time, abbreviations, branding, repeated punctuation) are implemented as regex in background.js since they need find/replace logic, not just flagging. See PATTERN_RULES in that file to edit them."
+}

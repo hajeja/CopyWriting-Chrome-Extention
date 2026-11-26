@@ -1,0 +1,38 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const {createPanel,deferred}=require('./panel-harness.cjs');
+(async()=>{
+ const p=createPanel();await p.ready();
+ assert.equal(p.nodes.projectTab.getAttribute('aria-selected'),'true');assert.equal(p.nodes.settingsPanel.hidden,true);
+ assert.equal(p.nodes.projectFields.hidden,true);assert.equal(p.nodes.projectChoice.disabled,true);assert(!p.nodes.switchProject);
+ p.change('domain','buyer');assert.equal(p.nodes.projectFields.hidden,true);assert.equal(p.nodes.projectChoice.disabled,false);
+ p.change('projectChoice','new');assert.equal(p.nodes.projectFields.hidden,false);
+ p.nodes.projectName.value='Airo';p.nodes.projectShared.value='Buyer messaging';await p.click('saveProject');
+ const project=p.ctx.memory.snapshot().project, revision=p.ctx.session.capture().revision;
+ assert.equal(p.nodes.projectSummary.textContent,'Buyer · Airo');assert.equal(p.nodes.projectFields.hidden,true);
+ await p.click('settingsTab');assert.equal(p.nodes.projectPanel.hidden,true);assert.equal(p.ctx.session.capture().revision,revision);assert.equal(p.ctx.memory.snapshot().project.id,project.id);assert.equal(p.state.requests.length,0);
+ const key='valid_looking_test_key_12345678';p.nodes.apiKey.value=key;await p.nodes.apiKey.handlers.input();assert.equal(p.nodes.testConnection.disabled,false);
+ const writes=p.state.writes;await p.click('testConnection');
+ assert.equal(p.nodes.connectionStatus.textContent,'Connection successful');assert.equal(p.state.requests.length,0);assert.equal(p.state.modelReads,1);assert.equal(p.state.writes,writes);
+ await p.click('projectTab');assert.equal(p.nodes.apiKey.value,key);assert.equal(p.nodes.connectionStatus.textContent,'Connection successful');assert.equal(p.ctx.memory.snapshot().project.id,project.id);
+ p.click('editProject');p.nodes.projectShared.value='Updated context';await p.click('saveProject');assert.equal(p.ctx.memory.snapshot().project.id,project.id);assert.equal(p.state.store.projectMemoryV2.length,1);
+ p.click('resetWorkspace');assert.equal(p.nodes.apiKey.value,key);assert.equal(p.nodes.connectionStatus.textContent,'Connection successful');assert.equal(p.nodes.projectFields.hidden,true);assert.equal(p.nodes.projectName.value,'');
+ p.change('domain','buyer');p.change('projectChoice',project.id);assert.equal(p.ctx.memory.snapshot().project.context,'Updated context');assert.equal(p.nodes.projectFields.hidden,true);
+ await p.click('settingsTab');p.nodes.apiKey.value='short';p.nodes.apiKey.handlers.input();assert.equal(p.nodes.connectionStatus.textContent,'');assert.equal(p.nodes.testConnection.disabled,true);
+ await p.click('testConnection');assert.equal(p.state.modelReads,1);
+ p.nodes.apiKey.value='invalid_but_plausible_key_12345';p.nodes.apiKey.handlers.input();p.state.modelFailure=401;await p.click('testConnection');assert.match(p.nodes.connectionStatus.textContent,/Connection failed.*rejected/);assert(!p.nodes.connectionStatus.textContent.includes(p.nodes.apiKey.value));assert.equal(p.state.requests.length,0);
+ p.state.modelFailure=null;const gate=deferred();p.state.modelGate=gate;
+ const pending=p.click('testConnection');assert.equal(p.nodes.connectionStatus.textContent,'Testing…');assert.equal(p.nodes.testConnection.disabled,true);
+ p.nodes.apiKey.value='replacement_key_1234567890';p.nodes.apiKey.handlers.input();assert(p.state.modelOptions.signal.aborted);assert.equal(p.nodes.connectionStatus.textContent,'');
+ gate.resolve({ok:true,json:async()=>({models:[]})});await pending;assert.equal(p.nodes.connectionStatus.textContent,'');assert.equal(p.nodes.testConnection.disabled,false);p.state.modelGate=null;
+ p.state.modelFailure=429;await p.click('testConnection');assert.match(p.nodes.connectionStatus.textContent,/quota/);p.state.modelFailure=null;
+ // Structured findings become one li per array entry, without punctuation splitting.
+ await p.click('projectTab');const rules=JSON.parse(fs.readFileSync('foundation/buyer-guidelines-v0.1.1-pilot-approved.json')).domains.buyer.guidelines;
+ const findings=['Emoji placement: Move the emoji to the end. Keep it.', 'Readability: Make the action easier to scan.'];
+ p.state.selectionText='😊 Pesananmu sudah sampai';p.state.reviewResponse=[{id:0,decision:'Rewrite',findings,suggestion:'Pesananmu sudah sampai 😊',ruleChecks:rules.map(rule=>({ruleId:rule.id,outcome:['buyer-playbook-21','buyer-playbook-05'].includes(rule.id)?'issue':'met',finding:rule.id==='buyer-playbook-21'?findings[0]:rule.id==='buyer-playbook-05'?findings[1]:''}))}];
+ await p.selected();const card=p.nodes.results.children.find(node=>node.tag==='article'), list=card.children.find(node=>node.tag==='ul');
+ assert.deepEqual(list.children.map(node=>node.tag),['li','li']);assert.deepEqual(list.children.map(node=>node.textContent),findings);
+ const resultText=p.text(), auditCalls=p.state.requests.length;await p.click('settingsTab');await p.click('projectTab');assert.equal(p.text(),resultText);assert.equal(p.state.requests.length,auditCalls);
+ p.state.tab={id:33,url:'https://docs.google.com/spreadsheets/d/example/edit'};await p.events.activated.emit({tabId:33});assert.equal(p.text(),'');
+ p.state.tab={id:34,url:'https://supplier-portal-invoice.haibearstd.chatgpt.site/'};await p.events.activated.emit({tabId:34});assert.equal(p.text(),'');assert.equal(p.ctx.memory.snapshot().project.id,project.id);
+ console.log('Tabs preserve project/results/key, explicit creation and saved-project selection, compact-header data, context editing, Reset retention, real-request connection states and bullet finding structure verified with mocks.');
+})().catch(error=>{console.error(error);process.exitCode=1;});

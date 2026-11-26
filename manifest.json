@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Astro Copy Checker",
+  "version": "0.5.3",
+  "description": "Review visible page copy and check selected text.",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "sidePanel",
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_title": "Astro Copy Checker"
+  },
+  "host_permissions": [
+    "https://supplier-portal-invoice.haibearstd.chatgpt.site/*",
+    "https://generativelanguage.googleapis.com/*"
+  ]
+}
